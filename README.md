@@ -1,6 +1,6 @@
 # Haystack
 
-Haystack is an open source NLP framework that allows you to use modern NLP models (like Transformer-based models) and Large Language Models (LLMs) to interact with your data.
+Haystack is an open source NLP framework that lets you use Transformer-based models (like BERT, RoBERTa, GPT-3) to build powerful NLP applications.
 
 ## Related Projects
 
