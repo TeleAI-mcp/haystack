@@ -1,62 +1,136 @@
-⚠️ ⚠️ ⚠️
+[![Contributors][contributors-src]][contributors-url]
+[![Version][version-src]][version-url]
+[![Build Status][build-src]][build-url]
+[![Documentation Status][docs-src]][docs-url]
+[![Discord][discord-src]][discord-url]
 
-You can also find this README in the [Haystack Documentation](https://docs.haystack.deepset.ai).
+[![][banner-img]][product-url]
 
-If you want to edit this README, please also edit the source file in the `docs` folder. The README in the docs is generated from the source.
+<p align="center">
+  <a href="https://haystack.deepset.ai/">
+    <img src="img/haystack_logo.svg" alt="Haystack" width="30%" />
+  </a>
+</p>
 
-<!-- This line is included for compatibility when no content is provided. Do not delete it. -->
-<!-- If you would like to manually update this file, please remove the above line -->
+# Haystack 🐏
 
-<div align="center">
+**Haystack** is an open-source AI orchestration framework for building context-engineered, production-ready LLM applications.
+Design modular pipelines and agent workflows with explicit control over retrieval, routing, memory, and generation.
+Built for scalable agents, RAG, multimodal applications, semantic search, and conversational systems.
 
-![Logo](https://raw.githubusercontent.com/deepset-ai/haystack/main/docs/img/haystack_logo_with_text.png)
+-   [Explore the Haystack Docs](https://docs.haystack.ai)
+-   [Read Haystack Tutorials](https://haystack.deepset.ai/tutorials)
+-   [Join the Haystack Discord community](https://discord.gg/haystack)
 
-[![CI](https://github.com/deepset-ai/haystack/actions/workflows/CI.yml/badge.svg?event=push)](https://github.com/deepset-ai/haystack/actions/workflows/CI.yml)
-[![CI docs](https://github.com/deepset-ai/haystack/actions/workflows/CI_docs.yml/badge.svg?event=push)](https://github.com/deepset-ai/haystack/actions/workflows/CI_docs.yml)
-[![Discord follow](https://dcbadge.vercel.app/api/server/9CCNQgx7Wh)](https://discord.gg/9CCNQgx7Wh)
-[![GitHub Repo Stars](https://img.shields.io/github/stars/deepset-ai/haystack?style=social)](https://github.com/deepset-ai/haystack/stargazers)
+## 🚀 Quick Start
 
-**Haystack** is an open-source AI framework tailored for building production-ready [agents](https://docs.haystack.deepset.ai/developers/agent的概念和定义/overview), [pipelines](https://docs.haystack.deepset.ai/developers/pipelines/overview), and integrations.
+Install Haystack 2.0 in Python 3.9+:
 
-Choose Haystack if you need full control over your AI pipelines, if privacy is key, or if you want to benefit from the open-source ecosystem.
+```sh
+pip install haystack-ai
+```
 
-- [GitHub](https://github.com/deepset-ai/haystack)
-- [Documentation](https://docs.haystack.deepset.ai)
-- [Discord](https://discord.gg/9CCNQgx7Wh)
-- [Contribution Guide](https://github.com/deepset-ai/haystack/blob/main/CONTRIBUTING.md)
+Create your first Retrieval Augmented Generation pipeline with just a few lines of code:
 
-## What is Haystack?
+```python
+from haystack import Pipeline
+from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
+from haystack.components.generators.openai import OpenAIGenerator
+from haystack.components.builders.prompt_builder import PromptBuilder
+from haystack import Document
 
-Haystack is designed to help developers build **production-ready AI applications** with:
+prompt_template = """
+Given these documents, answer the question.
+Documents:
+{% for doc in documents %}
+    {{ doc.content }}
+{% endfor %}
+Question: {{ query }}
+"""
 
-- 📚 **[Retrieval-Augmented Generation (RAG)](https://docs.haystack.deepset.ai/use_cases/qa)**: Connect LLMs to your organization's documents and other data sources. Use the latest LLMs, such as [OpenAI](https://docs.haystack.deepset.ai/integrations/openai), [Anthropic](https://docs.haystack.deepset.ai/integrations/anthropic), [Cohere](https://docs.haystack.deepset.ai/integrations/cohere), or [Azure](https://docs.haystack.deepset.ai/integrations/azure-openai). Retrieve context from [many document stores](https://docs.haystack.deepset.ai/integrations#all) and data sources.
+documents = [
+    Document(content="Paris is the capital of France."),
+    Document(content="The Eiffel Tower is located in Paris."),
+]
 
-- 🤖 **[Agents](https://docs.haystack.deepset.ai/developers/agent的概念和定义/overview)**: Build AI agents that can perform automated searches, API operations, and other actions. Give your agents access to tools via [local components](https://docs.haystack.deepset.ai/developers/agent_tools) and [MCP tools](https://docs.haystack.deepset.ai/developers/mcp).
+retriever = InMemoryBM25Retriever()
+prompt_builder = PromptBuilder(template=prompt_template)
+generator = OpenAIGenerator(model="gpt-4")
 
-- 🧩 **[Pipelines](https://docs.haystack.deepset.ai/developers/pipelines/overview)**: Create complex AI workflows using a drag-and-drop UI or in code. Connect components, define data flows, and debug issues easily.
+pipeline = Pipeline()
+pipeline.add_component("retriever", retriever)
+pipeline.add_component("prompt_builder", prompt_builder)
+pipeline.add_component("llm", generator)
 
-- 🔌 **[Integrations](https://docs.haystack.deepset.ai/integrations)**: Connect to the entire [open-source ecosystem](https://github.com/deepset-ai/haystack-core-integrations) and to the main AI providers, such as OpenAI, Anthropic, Azure, AWS, Google, and NVIDIA.
+pipeline.connect("retriever.documents", "prompt_builder.documents")
+pipeline.connect("prompt_builder.prompt", "llm.prompt")
 
-### Explore Haystack
+question = "Where is the Eiffel Tower located?"
+result = pipeline.run({"retriever": {"query": question}, "prompt_builder": {"query": question}})
 
-If you want to learn more about Haystack, the following resources are a great starting point:
+print(result["llm"]["replies"][0])
+# The Eiffel Tower is located in Paris.
+```
 
-- [Quick Start](https://docs.haystack.deepset.ai/tutorials/quick_start): Learn the basics with this Jupyter Notebook tutorial.
-- [Tutorials](https://docs.haystack.deepset.ai/tutorials): More in-depth tutorials on RAG, agents, and pipelines.
-- [Use Cases](https://docs.haystack.deepset.ai/use_cases/qa): Real-world AI applications, such as [question answering with PDFs](https://docs.haystack.deepset.ai/use_cases/qa#example-notebooks) and [conversation with GitHub Issues](https://docs.haystack.deepset.ai/use_cases/qa#example-notebooks).
-- [Concepts](https://docs.haystack.deepset.ai/concepts/intro): A deep dive into the main concepts: [Pipelines](https://docs.haystack.deepset.ai/developers/pipelines/overview), [Components](https://docs.haystack.deepset.ai/developers/components/overview), [Data Classes](https://docs.haystack.deepset.ai/concepts/data-classes), and [Agent](https://docs.haystack.deepset.ai/developers/agent的概念和定义/overview).
+> **Note**: You will need to set `OPENAI_API_KEY` as an environment variable to run the code above.
 
-### Community
+Explore the [Tutorials](https://haystack.deepset.ai/tutorials) to find more examples!
 
-If you have questions about Haystack, feel free to open an issue in the repository or post it in the Discord channel. We are always happy to help!
+## 🦙 LLMWorkshop
 
-### Contributing
+Learn how to build production-ready LLM applications with [LLMWorkshop](https://haystack.deepset.ai/llm-workshop).
+This interactive course is designed for developers who want to master RAG systems and AI agents using Haystack.
 
-Thanks for your interest in improving Haystack! There's a place for everyone in the Haystack community, and our [contribution guidelines](https://github.com/deepset-ai/haystack/blob/main/CONTRIBUTING.md) are a great starting point. If you're considering your first contribution, we'd especially love to welcome you ⭐
+## 📙 Documentation
 
-If you would like to contribute, please first take a look at the issues labeled as [good first issues](https://github.com/deepset-ai/haystack/contribute) or [contributions welcome](https://github.com/orgs/deepset-ai/projects/14).
+| Topic | Description |
+| :--- | :--- |
+| [📓 Tutorials](https://haystack.deepset.ai/tutorials) | Learn how to build LLM applications with Haystack by following these step-by-step guides |
+| [🐍 API Reference](https://docs.haystack.ai/reference/python-api) | Detailed documentation for the Haystack Python API |
+| [🏖️ Haystack UI](https://github.com/deepset-ai/haystack-webui) | Web UI for your LLM apps |
+| [🤖 Hugging Face 🤖](https://huggingface.co/haystack) | Try out Haystack models on the Hugging Face Hub |
+| [📖 Glossary](https://docs.haystack.ai/concepts/glossary) | General overview of core concepts |
 
-## Related Projects
+## 🍿 Deep Dives
+
+If you need more in-depth explanations, check out our Deep Dives:
+
+| Topic | Description |
+| :--- | :--- |
+| [RAG](https://docs.haystack.ai/concepts/rag) | Retrieval Augmented Generation explained |
+| [Agents](https://docs.haystack.ai/concepts/agents) | LLMs that can execute actions |
+| [Preprocessors](https://docs.haystack.ai/concepts/preprocessors) | How to preprocess your data for indexing |
+| [Retrievers](https://docs.haystack.ai/concepts/retrievers) | The many ways to perform retrieval |
+| [Evaluations](https://docs.haystack.ai/concepts/evaluation) | How to evaluate your LLM pipelines |
+| [LLM Engines](https://docs.haystack.ai/concepts/llm-engines) | Everything about the LLM interface |
+
+## 💙 Contributing
+
+Thanks for your interest in contributing!
+
+There are many ways to contribute to Haystack:
+report bugs, fix bugs, improve docs, add new features.
+To start your contribution journey, check out the
+[Contributing Guide](CONTRIBUTING.md).
+
+[contributors-src]: https://img.shields.io/github/contributors/deepset-ai/haystack?style=flat-square&color=blueviolet
+[contributors-url]: https://github.com/deepset-ai/haystack/graphs/contributors
+
+[version-src]: https://img.shields.io/pypi/v/haystack-ai.svg?style=flat-square
+[version-url]: https://pypi.org/project/haystack-ai/
+
+[build-src]: https://github.com/deepset-ai/haystack/actions/workflows/continuous.yml/badge.svg?branch=main
+[build-url]: https://github.com/deepset-ai/haystack/actions/workflows/continuous.yml
+
+[docs-src]: https://readthedocs.org/projects/haystack/badge/?version=latest
+[docs-url]: https://docs.haystack.ai
+
+[discord-src]: https://img.shields.io/discord/813759841454308374?color=7289da&label=Discord&logo=Discord&logoColor=white&style=flat-square
+[discord-url]: https://discord.gg/haystack
+
+[product-url]: https://haystack.deepset.ai
+
+[banner-img]: img/banner_readme.png
 
 1. related project [langchain-ai/langchain](https://github.com/langchain-ai/langchain)
 2. related project [run-llama/llama_index](https://github.com/run-llama/llama_index)
